@@ -38,8 +38,13 @@ FRONTEND = ROOT / "frontend"
 
 CFG_FILE = Path("/kaggle/working/.jais_config.json")
 CONFIG = {}
-if CFG_FILE.exists():
-    CONFIG = json.loads(CFG_FILE.read_text(encoding="utf-8"))
+for _c in ([Path(os.environ["JAIS_CONFIG"])] if os.environ.get("JAIS_CONFIG") else []) + [
+    Path("/content/.jais_config.json"),      # Google Colab
+    Path("/kaggle/working/.jais_config.json") # Kaggle
+]:
+    if _c.exists():
+        CONFIG = json.loads(_c.read_text(encoding="utf-8"))
+        break
 
 PORT = int(CONFIG.get("PORT", 8000))
 ASR_SIZE = CONFIG.get("ASR_SIZE", "small")

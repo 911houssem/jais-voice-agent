@@ -76,8 +76,8 @@ async function sendText(text) {
     if (d.audio_b64) {
       const audio = document.getElementById("audio-player");
       audio.src = `data:${d.mime};base64,${d.audio_b64}`;
-      // audio.play().catch(()=>{});
-      document.getElementById("audio-note").textContent = `مدة الصوت: ${d.duration_s}s · ${d.demo ? "demo tone" : "SILMA TTS"}`;
+      audio.play().catch(() => {});
+      document.getElementById("audio-note").textContent = `مدة الصوت: ${d.duration_s}s · ${d.demo ? "demo tone" : "صوت عربي حقيقي"}`;
     }
   } catch (e) {
     addMsg("agent", "تعذّر الاتصال بالخادم: " + e.message);
@@ -91,7 +91,7 @@ chatInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendText(chatInput.value);
 });
 
-// mic button (demo: random prompt)
+// mic button: real microphone recording (tap to talk, tap again to stop)
 const prompts = [
   "أريد حجز موعد",
   "ما هي ساعات العمل؟",
@@ -99,10 +99,62 @@ const prompts = [
   "كم تكلفة الاستشارة؟",
   "أريد التحدث مع موظف",
 ];
+let recorder = null, recChunks = [], recording = false;
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recChunks = [];
+    const opts = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+      ? { mimeType: "audio/webm;codecs=opus" } : {};
+    recorder = new MediaRecorder(stream, opts);
+    recorder.ondataavailable = (e) => { if (e.data.size) recChunks.push(e.data); };
+    recorder.onstop = async () => {
+      stream.getTracks().forEach((t) => t.stop());
+      await handleVoice(new Blob(recChunks, { type: recorder.mimeType || "audio/webm" }));
+    };
+    recorder.start();
+    recording = true;
+    document.getElementById("audio-note").textContent = "🔴 أسمعك... اضغط على الميكروفون مرة أخرى للإيقاف والإرسال";
+  } catch (e) {
+    // microphone unavailable -> fall back to a demo prompt
+    const p = prompts[Math.floor(Math.random() * prompts.length)];
+    chatInput.value = p;
+    sendText(p);
+  }
+}
+
+async function handleVoice(blob) {
+  demoWave.classList.add("active");
+  const holder = addMsg("user", "🎙️ (رسالة صوتية)");
+  try {
+    const fd = new FormData();
+    fd.append("file", blob, "speech.webm");
+    const r = await fetch(`${API}/asr`, { method: "POST", body: fd });
+    const a = await r.json();
+    const text = (a.text || "").trim();
+    if (!text) {
+      holder.querySelector(".bubble").textContent = "🎙️ (لم أسمع كلامًا واضحًا)";
+      addMsg("agent", "ما سمعت كلامًا واضحًا، جرب مرة ثانية.");
+      return;
+    }
+    holder.querySelector(".bubble").textContent = text; // real transcript
+    await sendText(text);
+  } catch (e) {
+    addMsg("agent", "تعذّر التعرّف على الصوت: " + e.message);
+  } finally {
+    setTimeout(() => demoWave.classList.remove("active"), 600);
+    document.getElementById("audio-note").textContent = "";
+  }
+}
+
 document.getElementById("mic-btn").addEventListener("click", () => {
-  const p = prompts[Math.floor(Math.random() * prompts.length)];
-  chatInput.value = p;
-  sendText(p);
+  if (recording && recorder && recorder.state === "recording") {
+    recorder.stop();
+    recording = false;
+  } else {
+    startRecording();
+  }
 });
 
 // ---- Dashboard demo data ----

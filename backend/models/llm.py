@@ -88,12 +88,33 @@ class LLMModel:
                 text = r.json()["choices"][0]["message"]["content"]
             else:
                 import torch
-                prompt = _TOKENIZER.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                # Jais chat template requires a thinking field on every
+                # assistant message in history.
+                for m in messages:
+                    if m.get("role") == "assistant" and not any(
+                            k in m for k in ("think", "think_fast", "think_faster",
+                                             "reasoning", "reasoning_content")):
+                        m["think"] = ""
+                try:
+                    prompt = _TOKENIZER.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True,
+                        reasoning_effort="low")
+                except TypeError:
+                    prompt = _TOKENIZER.apply_chat_template(
+                        messages, tokenize=False, add_generation_prompt=True)
                 inputs = _TOKENIZER(prompt, return_tensors="pt").to(settings.device)
                 with torch.no_grad():
                     out = _MODEL.generate(**inputs, max_new_tokens=settings.max_new_tokens,
                                           temperature=0.6, do_sample=True)
                 text = _TOKENIZER.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+                # Keep only the answer that follows the reasoning block, if any
+                close = max(text.rfind("</ifm|think>"), text.rfind("</ifm|think_fast>"),
+                            text.rfind("</ifm|think_faster>"))
+                if close >= 0:
+                    text = text[close:].split(">", 1)[-1]
+                for tag in ("<ifm|think>", "<ifm|think_fast>", "<ifm|think_faster>",
+                            "<|ifm|im_start|>", "<|ifm|im_end|>"):
+                    text = text.replace(tag, "")
             return {"text": text.strip(), "latency_ms": round((time.time() - t0) * 1000, 1), "demo": False}
         except Exception as e:
             return {"text": f"[خطأ LLM: {e}]", "latency_ms": round((time.time() - t0) * 1000, 1), "demo": False, "error": str(e)}

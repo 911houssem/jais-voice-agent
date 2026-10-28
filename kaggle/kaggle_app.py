@@ -161,13 +161,38 @@ def llm_generate(user_text: str, history: list) -> dict:
     try:
         import torch
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + history[-12:] + [{"role": "user", "content": user_text}]
-        prompt = _tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        # Jais chat template requires a thinking field on every assistant
+        # message (think/think_fast/think_faster/reasoning/reasoning_content).
+        for m in messages:
+            if m.get("role") == "assistant" and not any(
+                    k in m for k in ("think", "think_fast", "think_faster",
+                                     "reasoning", "reasoning_content")):
+                m["think"] = ""
+        try:
+            prompt = _tok.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True,
+                reasoning_effort="low")  # think_faster: fastest for voice chat
+        except TypeError:
+            # older transformers: reasoning_effort not forwarded to template
+            prompt = _tok.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True)
         inputs = _tok(prompt, return_tensors="pt").to(model.device)
         with torch.no_grad():
-            out = model.generate(**inputs, max_new_tokens=120, do_sample=True,
+            out = model.generate(**inputs, max_new_tokens=400, do_sample=True,
                                  temperature=0.6, top_p=0.9,
                                  pad_token_id=_tok.pad_token_id)
         text = _tok.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True).strip()
+        # Strip the reasoning block if the model emitted one: keep text after
+        # the last closing think tag (</ifm|think>, </ifm|think_fast>, ...).
+        close = max(text.rfind("</ifm|think>"), text.rfind("</ifm|think_fast>"),
+                    text.rfind("</ifm|think_faster>"))
+        if close >= 0:
+            text = text[close:].split(">", 1)[-1].strip()
+        # Drop any leading residual control markers
+        for tag in ("<ifm|think>", "<ifm|think_fast>", "<ifm|think_faster>",
+                    "<|ifm|im_start|>", "<|ifm|im_end|>"):
+            text = text.replace(tag, "")
+        text = text.strip()
         return {"text": text, "latency_ms": round((time.time()-t0)*1000,1), "demo": False}
     except Exception as e:  # noqa
         return {"text": f"[خطأ LLM: {e}]", "latency_ms": round((time.time()-t0)*1000,1),

@@ -1,0 +1,15 @@
+{
+  "id": "911houssem/jais-voice-agent-arabic",
+  "title": "Jais Voice Agent — وكيل صوتي عربي (ASR→LLM→TTS)",
+  "code_file": "jais_voice_kaggle.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "competition_sources": [],
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "keywords": ["jais", "arabic", "asr", "tts", "voice-agent", "whisper", "edge-tts"],
+  "summary": "مكالمة صوتية مباشرة بالعربية: faster-whisper + Jais-3-7B + edge-tts مع واجهة عربية ونفق عام."
+}

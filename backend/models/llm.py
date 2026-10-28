@@ -49,12 +49,14 @@ class LLMModel:
                 return
             # transformers
             from transformers import AutoModelForCausalLM, AutoTokenizer
-            path = str(settings.llm_path)
-            _TOKENIZER = AutoTokenizer.from_pretrained(path, trust_remote_code=True)
-            _MODEL = AutoModelForCausalLM.from_pretrained(
-                path, trust_remote_code=True, torch_dtype="auto",
-                device_map=settings.device,
-            )
+            ref = settings.ref(settings.llm_model_path)
+            tok = settings.hf_token or None
+            _TOKENIZER = AutoTokenizer.from_pretrained(ref, trust_remote_code=True, token=tok)
+            load_kwargs = dict(trust_remote_code=True, torch_dtype="auto",
+                               device_map=settings.device, token=tok)
+            if settings.llm_load_in_8bit:
+                load_kwargs.update(load_in_8bit=True)
+            _MODEL = AutoModelForCausalLM.from_pretrained(ref, **load_kwargs)
             _LOADED = True
         except Exception as e:
             _LOAD_ERROR = f"{type(e).__name__}: {e}"
@@ -89,7 +91,8 @@ class LLMModel:
                 prompt = _TOKENIZER.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
                 inputs = _TOKENIZER(prompt, return_tensors="pt").to(settings.device)
                 with torch.no_grad():
-                    out = _MODEL.generate(**inputs, max_new_tokens=120, temperature=0.6, do_sample=True)
+                    out = _MODEL.generate(**inputs, max_new_tokens=settings.max_new_tokens,
+                                          temperature=0.6, do_sample=True)
                 text = _TOKENIZER.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
             return {"text": text.strip(), "latency_ms": round((time.time() - t0) * 1000, 1), "demo": False}
         except Exception as e:

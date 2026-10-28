@@ -41,11 +41,22 @@ class TTSModel:
             _LOAD_ERROR = "demo mode"
             _LOADED = True
             return
+        backend = settings.tts_backend.lower()
         try:
-            # SILMA ships as model.pt + finetune_cli; load torch checkpoint lazily
-            import torch
-            path = settings.tts_path / "model.pt"
-            _MODEL = torch.load(str(path), map_location=settings.device, weights_only=False)
+            if backend in ("auto", "silma"):
+                # SILMA ships as model.pt; load torch checkpoint lazily
+                import torch
+                path = settings.tts_path / "model.pt"
+                if path.exists():
+                    _MODEL = torch.load(str(path), map_location=settings.device, weights_only=False)
+                    _LOADED = True
+                    return
+                if backend == "silma":
+                    raise FileNotFoundError(f"SILMA weights not found: {path}")
+            # edge backend: verified working on Kaggle (ar-SA-HamedNeural)
+            import edge_tts  # noqa: F401
+            _MODEL = "edge"
+            _LOAD_ERROR = None
             _LOADED = True
         except Exception as e:
             _LOAD_ERROR = f"{type(e).__name__}: {e}"
@@ -64,7 +75,40 @@ class TTSModel:
                 "latency_ms": round((time.time() - t0) * 1000 + 260, 1),
                 "demo": True,
             }
-        # Real path would call SILMA inference here
+        if _MODEL == "edge":
+            try:
+                import asyncio
+                import edge_tts
+
+                async def _run() -> bytes:
+                    comm = edge_tts.Communicate(text, settings.edge_voice)
+                    buf = io.BytesIO()
+                    async for chunk in comm.stream():
+                        if chunk["type"] == "audio":
+                            buf.write(chunk["data"])
+                    return buf.getvalue()
+
+                try:
+                    loop = asyncio.get_running_loop()
+                except RuntimeError:
+                    loop = None
+                if loop and loop.is_running():
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
+                        audio = ex.submit(asyncio.run, _run()).result(timeout=60)
+                else:
+                    audio = asyncio.run(_run())
+                return {
+                    "audio": audio, "mime": "audio/mpeg",
+                    "duration_s": round(len(audio) / 16000, 2),
+                    "latency_ms": round((time.time() - t0) * 1000, 1),
+                    "demo": False,
+                }
+            except Exception as e:
+                return {"audio": _demo_wav(), "mime": "audio/wav", "duration_s": 1.2,
+                        "latency_ms": round((time.time() - t0) * 1000, 1),
+                        "demo": True, "error": str(e)}
+        # SILMA path: real path would call SILMA inference here
         audio = _demo_wav()  # placeholder until SILMA API wired
         return {
             "audio": audio, "mime": "audio/wav",

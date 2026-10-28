@@ -31,12 +31,14 @@ class ASRModel:
         try:
             # Jais-ASR ships custom code; load via transformers AutoModel if present
             from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
-            path = str(settings.asr_path)
+            ref = settings.ref(settings.asr_model_path)
+            tok = settings.hf_token or None
+            dtype = settings.asr_torch_dtype
             _MODEL = AutoModelForSpeechSeq2Seq.from_pretrained(
-                path, trust_remote_code=True, torch_dtype="auto",
-                device_map=settings.device,
+                ref, trust_remote_code=True, torch_dtype=dtype,
+                device_map=settings.device, token=tok,
             )
-            cls._processor = AutoProcessor.from_pretrained(path, trust_remote_code=True)
+            cls._processor = AutoProcessor.from_pretrained(ref, trust_remote_code=True, token=tok)
             _LOADED = True
         except Exception as e:
             _LOAD_ERROR = f"{type(e).__name__}: {e}"
@@ -58,6 +60,15 @@ class ASRModel:
         # Real path
         import io, soundfile as sf, numpy as np
         data, sr = sf.read(io.BytesIO(audio_bytes))
+        # Jais-ASR (Whisper-based) expects 16 kHz mono
+        if sr != 16000 and len(data) > 0:
+            n_out = int(len(data) * 16000 / sr)
+            x_old = np.linspace(0.0, 1.0, num=len(data), endpoint=False)
+            x_new = np.linspace(0.0, 1.0, num=n_out, endpoint=False)
+            data = np.interp(x_new, x_old, data).astype(np.float32)
+            sr = 16000
+        if data.ndim > 1:
+            data = data.mean(axis=1)
         inputs = cls._processor(data, sampling_rate=sr, return_tensors="pt").to(settings.device)
         with torch.no_grad():
             ids = _MODEL.generate(**inputs)

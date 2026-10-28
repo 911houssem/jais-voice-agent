@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     max_concurrent_calls: int = Field(default=45, alias="MAX_CONCURRENT_CALLS")
     host: str = Field(default="0.0.0.0", alias="HOST")
     port: int = Field(default=8000, alias="PORT")
+    # HuggingFace Space / cloud
+    hf_token: str = Field(default="", alias="HF_TOKEN")
+    llm_load_in_8bit: bool = Field(default=False, alias="LLM_LOAD_IN_8BIT")
+    asr_torch_dtype: str = Field(default="auto", alias="ASR_DTYPE")
+    tts_backend: str = Field(default="auto", alias="TTS_BACKEND")  # auto|silma|edge|demo
+    edge_voice: str = Field(default="ar-SA-HamedNeural", alias="EDGE_VOICE")
+    max_new_tokens: int = Field(default=120, alias="MAX_NEW_TOKENS")
 
     class Config:
         env_file = str(ROOT / ".env")
@@ -31,6 +38,11 @@ class Settings(BaseSettings):
         if not path.is_absolute():
             path = (ROOT / path).resolve()
         return path
+
+    def ref(self, p: str) -> str:
+        """Local path if it exists on disk, otherwise treat the value as a HF repo id."""
+        path = self.resolve(p)
+        return str(path) if path.exists() else p
 
     @property
     def asr_path(self) -> Path:

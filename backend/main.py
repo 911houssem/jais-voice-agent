@@ -34,12 +34,23 @@ app.include_router(api_router, prefix="/api")
 
 @app.on_event("startup")
 def _warmup():
-    from backend.models.asr import ASRModel
-    from backend.models.llm import LLMModel
-    from backend.models.tts import TTSModel
-    ASRModel.load()
-    LLMModel.load()
-    TTSModel.load()
+    """Load models in a background thread so the server binds its port instantly
+    (HF Spaces kill containers that don't listen quickly) while the ~30GB of
+    weights download lazily on first use."""
+    import threading
+
+    def _load_all():
+        try:
+            from backend.models.asr import ASRModel
+            from backend.models.llm import LLMModel
+            from backend.models.tts import TTSModel
+            ASRModel.load()
+            LLMModel.load()
+            TTSModel.load()
+        except Exception:
+            pass  # /api/status surfaces per-model load errors
+
+    threading.Thread(target=_load_all, daemon=True).start()
 
 
 if FRONTEND.exists():

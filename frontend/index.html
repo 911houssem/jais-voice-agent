@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jais Voice — وكيل صوتي عربي 24/7</title>
+  <meta name="description" content="منصة أتمتة مكالمات العملاء باللغة العربية — ASR + LLM + TTS متكامل، استضافة ذاتية، هامش 80%." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <!-- ===== Top Nav ===== -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-mark">ص</span>
+        <span class="brand-name">Jais Voice</span>
+        <span class="brand-tag">وكيل صوتي</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">الميزات</a>
+        <a href="#demo">تجربة حية</a>
+        <a href="#dashboard">لوحة التحكم</a>
+        <a href="#models">النماذج</a>
+        <a href="#pricing">التسعير</a>
+      </nav>
+      <div class="nav-cta">
+        <span id="status-pill" class="pill pill-demo">وضع Demo</span>
+        <a href="#demo" class="btn btn-primary btn-sm">ابدأ الآن</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Hero ===== -->
+  <section id="top" class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">🚀 منصة أتمتة مكالمات بالذكاء الاصطناعي — عربي 100%</span>
+        <h1>وكيل صوتي <span class="grad">يتحدث Arabic</span><br/>ويجيب عملاءك <span class="grad2">24/7</span></h1>
+        <p class="lead">دمج <strong>Jais-ASR</strong> (لهجات عربية) + <strong>Jais-3-7B</strong> (توليد) + <strong>SILMA TTS</strong> (صوت) في خط أنبابة واحد — استضافة ذاتية، بدون رسوم per-token، هامش ربح ~80%.</p>
+        <div class="hero-actions">
+          <a href="#demo" class="btn btn-primary">جرّب مكالمة الآن</a>
+          <a href="#pricing" class="btn btn-ghost">عرض التسعير</a>
+        </div>
+        <div class="hero-stats">
+          <div><b>45</b><span>مكالمة متزامنة</span></div>
+          <div><b>&lt;1.5s</b><span>زمن الرد</span></div>
+          <div><b>80%</b><span>هامش ربح</span></div>
+          <div><b>22+</b><span>لهجة عربية</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="wave-card">
+          <div class="wave-header">
+            <span class="dot live"></span>
+            <span>مكالمة نشطة · عيادة النور</span>
+            <span class="timer" id="hero-timer">00:42</span>
+          </div>
+          <div class="waveform" id="hero-wave">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div class="transcript">
+            <div class="t-line agent"><b>الوكيل:</b> أهلاً بك! كيف يمكنني مساعدتك؟</div>
+            <div class="t-line user"><b>العميل:</b> أريد حجز موعد.</div>
+            <div class="t-line agent"><b>الوكيل:</b> بالتأكيد. ما اسمك الكامل؟</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Features ===== -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">الميزات</span>
+        <h2>كل ما تحتاجه لتشغيل مركز اتصال ذكي</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card feat">
+          <div class="feat-icon">🎙️</div>
+          <h3>ASR بلهجات عربية</h3>
+          <p>Jais-ASR يفهم خليجي، مصري، شامي، مغاربي + code-switching + تشكيل.</p>
+        </div>
+        <div class="card feat">
+          <div class="feat-icon">🧠</div>
+          <h3>LLM 7B (512K سياق)</h3>
+          <p>Jais-3-7B — توليد ردود طبيعية، حجز مواعيد، تأهيل عملاء.</p>
+        </div>
+        <div class="card feat">
+          <div class="feat-icon">🔊</div>
+          <h3>TTS مع استنساخ صوت</h3>
+          <p>SILMA TTS (F5) — صوت لكل عميل بأقل من 8 ثوانٍ من مرجع.</p>
+        </div>
+        <div class="card feat">
+          <div class="feat-icon">🏠</div>
+          <h3>استضافة ذاتية (On-Prem)</h3>
+          <p>بياناتك لا تخرج من شركتك — مثالي للجهات الحكومية والبنوك.</p>
+        </div>
+        <div class="card feat">
+          <div class="feat-icon">⚡</div>
+          <h3>زمن رد &lt; 1.5s</h3>
+          <p>بثّ (streaming) على 3 مستويات + continuous batching.</p>
+        </div>
+        <div class="card feat">
+          <div class="feat-icon">📈</div>
+          <h3>هامش ~80%</h3>
+          <p>تكلفة ثابتة (استضافة) — كل دقيقة إضافية = 83% هامش.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Live Demo ===== -->
+  <section id="demo" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">تجربة حية</span>
+        <h2>تحدث مع الوكيل الآن</h2>
+        <p class="muted">أرسل نصًا (أو فعّل الميكروفون) وشاهد خط الأنف والحنجرة كاملًا: ASR → LLM → TTS.</p>
+      </div>
+      <div class="demo-shell">
+        <div class="demo-chat">
+          <div class="demo-header">
+            <span class="dot live"></span>
+            <span>وكيل · عيادة النور</span>
+            <span class="demo-latency" id="demo-latency">— ms</span>
+          </div>
+          <div class="chat-log" id="chat-log">
+            <div class="msg agent">
+              <div class="bubble">أهلاً بك! كيف يمكنني مساعدتك اليوم؟</div>
+              <div class="meta">وكيل · just now</div>
+            </div>
+          </div>
+          <div class="demo-input">
+            <button id="mic-btn" class="mic-btn" title="ميكروفون (demo)">🎤</button>
+            <input id="chat-input" type="text" placeholder="اكتب رسالة... (مثال: أريد حجز موعد)" />
+            <button id="send-btn" class="btn btn-primary btn-sm">إرسال</button>
+          </div>
+          <div class="demo-wave" id="demo-wave">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="demo-side">
+          <div class="card">
+            <h4>⏱️ التوقيت (ms)</h4>
+            <div class="timing-row"><span>ASR</span><b id="t-asr">—</b></div>
+            <div class="timing-row"><span>LLM</span><b id="t-llm">—</b></div>
+            <div class="timing-row"><span>TTS</span><b id="t-tts">—</b></div>
+            <div class="timing-row total"><span>الإجمالي</span><b id="t-total">—</b></div>
+          </div>
+          <div class="card">
+            <h4>🔊 الصوت المُولّد</h4>
+            <audio id="audio-player" controls style="width:100%"></audio>
+            <p class="muted small" id="audio-note">سيظهر الصوت بعد الرد.</p>
+          </div>
+          <div class="card">
+            <h4>📊 الحالة</h4>
+            <div class="timing-row"><span>الوضع</span><b id="mode-label">demo</b></div>
+            <div class="timing-row"><span>النموذج</span><b>Jais-3-7B</b></div>
+            <div class="timing-row"><span>الاستضافة</span><b>ذاتية</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Dashboard ===== -->
+  <section id="dashboard" class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">لوحة التحكم</span>
+        <h2>راقب مكالماتك لحظة بلحظة</h2>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><span class="kpi-label">مكالمات نشطة</span><span class="kpi-val" id="kpi-active">12</span><span class="kpi-delta up">+3</span></div>
+        <div class="kpi"><span class="kpi-label">دقائق اليوم</span><span class="kpi-val" id="kpi-mins">1,842</span><span class="kpi-delta up">+12%</span></div>
+        <div class="kpi"><span class="kpi-label">متوسط زمن الرد</span><span class="kpi-val" id="kpi-lat">980ms</span><span class="kpi-delta down">-40ms</span></div>
+        <div class="kpi"><span class="kpi-label">رضا العملاء</span><span class="kpi-val" id="kpi-csat">4.7★</span><span class="kpi-delta up">+0.2</span></div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card chart-card">
+          <h4>المكالمات — آخر 7 أيام</h4>
+          <div class="bar-chart" id="bar-chart"></div>
+        </div>
+        <div class="card">
+          <h4>آخر المكالمات</h4>
+          <table class="calls-table">
+            <thead><tr><th>العميل</th><th>المدة</th><th>النتيجة</th><th>زمن الرد</th></tr></thead>
+            <tbody id="calls-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Models ===== -->
+  <section id="models" class="section section-dark">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">النماذج</span>
+        <h2>ثلاثة نماذج، منصة واحدة</h2>
+      </div>
+      <div class="grid-3">
+        <div class="card model-card">
+          <div class="model-head"><span class="model-name">Jais-ASR</span><span class="badge badge-ok">جاهز</span></div>
+          <div class="model-meta">10.67 GB · 3 shards · 22+ لهجة</div>
+          <p>تحويل كلام→نص بلهجات عربية + code-switching + تشكيل.</p>
+          <div class="model-stats">
+            <span>WER ~6%</span><span>RTF 0.3x</span>
+          </div>
+        </div>
+        <div class="card model-card">
+          <div class="model-head"><span class="model-name">Jais-3-7B</span><span class="badge badge-ok">جاهز</span></div>
+          <div class="model-meta">16.78 GB · 4 shards · 512K سياق</div>
+          <p>توليد ردود طبيعية، حجز مواعيد، تأهيل عملاء (عربي/إنجليزي).</p>
+          <div class="model-stats">
+            <span>7B params</span><span>FP8/BF16</span>
+          </div>
+        </div>
+        <div class="card model-card">
+          <div class="model-head"><span class="model-name">SILMA TTS</span><span class="badge badge-ok">جاهز</span></div>
+          <div class="model-meta">~2.4 GB · F5-TTS · 150M params</div>
+          <p>نص→صوت، استنساخ صوت &lt; 8 ثوانٍ، عربي/إنجليزي.</p>
+          <div class="model-stats">
+            <span>150M</span><span>voice clone</span>
+          </div>
+        </div>
+      </div>
+      <div class="models-status" id="models-status">
+        <h4>حالة النظام</h4>
+        <div id="status-json" class="code-block">جاري التحميل...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pricing ===== -->
+  <section id="pricing" class="section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">التسعير</span>
+        <h2>باقات تناسب كل حجم</h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="card price-card">
+          <h3>Starter</h3>
+          <div class="price">2,999 <span>ر.س/شهر</span></div>
+          <ul>
+            <li>6,600 دقيقة/شهر</li>
+            <li>1 concurrent</li>
+            <li>صوت قياسي</li>
+            <li>دعم بالبريد</li>
+          </ul>
+          <a href="#demo" class="btn btn-ghost btn-block">ابدأ</a>
+        </div>
+        <div class="card price-card featured">
+          <div class="featured-ribbon">الأكثر مبيعًا</div>
+          <h3>Growth</h3>
+          <div class="price">7,999 <span>ر.س/شهر</span></div>
+          <ul>
+            <li>20,000 دقيقة/شهر</li>
+            <li>10 concurrent</li>
+            <li>استنساخ صوت</li>
+            <li>لوحة تحكم + تحليلات</li>
+            <li>دعم أولوية</li>
+          </ul>
+          <a href="#demo" class="btn btn-primary btn-block">ابدأ</a>
+        </div>
+        <div class="card price-card">
+          <h3>Enterprise</h3>
+          <div class="price">مخصص</div>
+          <ul>
+            <li>دقائق غير محدودة</li>
+            <li>45+ concurrent</li>
+            <li>on-prem / سحابة خاصة</li>
+            <li>SLA 99.9%</li>
+            <li>امتثال PDPL</li>
+          </ul>
+          <a href="#demo" class="btn btn-ghost btn-block">اتصل بنا</a>
+        </div>
+      </div>
+      <p class="muted center" style="margin-top:24px;">أو تسعير per-minute: <b>$0.12/دقيقة</b> (0.45 ر.س) · الحد الأدنى $0.08 · لا رسوم إعداد.</p>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <div class="brand"><span class="brand-mark">ص</span><span class="brand-name">Jais Voice</span></div>
+        <p class="muted small">منصة أتمتة مكالمات بالذكاء الاصطناعي — عربي 100%.</p>
+      </div>
+      <div>
+        <h5>المنتج</h5>
+        <a href="#features">الميزات</a><a href="#demo">تجربة</a><a href="#pricing">التسعير</a>
+      </div>
+      <div>
+        <h5>النماذج</h5>
+        <a href="#models">Jais-ASR</a><a href="#models">Jais-3-7B</a><a href="#models">SILMA TTS</a>
+      </div>
+      <div>
+        <h5>قانوني</h5>
+        <a href="#">الشروط</a><a href="#">الخصوصية</a><a href="#">PDPL</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span class="muted small">© 2026 Jais Voice. النماذج مرخصة Apache-2.0.</span>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

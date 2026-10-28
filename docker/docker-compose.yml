@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  voice-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MODE=demo
+    volumes:
+      - ../:/app
+    restart: unless-stopped

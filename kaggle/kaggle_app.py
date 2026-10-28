@@ -51,6 +51,7 @@ ASR_SIZE = CONFIG.get("ASR_SIZE", "small")
 ASR_DEVICE = CONFIG.get("ASR_DEVICE", "cpu")
 LLM_MODEL = CONFIG.get("LLM_MODEL", "inception42/Jais-3-7B")
 TTS_VOICE = CONFIG.get("TTS_VOICE", "ar-SA-HamedNeural")
+_llm_8bit = str(CONFIG.get("LLM_8BIT", False)).lower() in ("1", "true", "yes")
 
 SYSTEM_PROMPT = (
     "أنت وكيل صوتي لخدمة العملاء باللغة العربية. "
@@ -114,13 +115,34 @@ def _get_llm():
     try:
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
-        dtype = torch.float16 if torch.cuda.is_available() else torch.float32
-        device_map = "auto" if torch.cuda.is_available() else None
+        cuda = torch.cuda.is_available()
+        dtype = torch.float16 if cuda else torch.float32
+        device_map = "auto" if cuda else None
         _tok = AutoTokenizer.from_pretrained(LLM_MODEL, trust_remote_code=True)
-        _llm = AutoModelForCausalLM.from_pretrained(
-            LLM_MODEL, trust_remote_code=True, torch_dtype=dtype,
-            device_map=device_map, low_cpu_mem_usage=True,
-        )
+        kwargs = dict(trust_remote_code=True, device_map=device_map,
+                      low_cpu_mem_usage=True)
+        if _llm_8bit and cuda:
+            # 8-bit: ~7GB VRAM instead of ~14GB -> safe on a free T4 (16GB)
+            try:
+                from transformers import BitsAndBytesConfig
+                kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
+                kwargs["torch_dtype"] = dtype
+            except Exception:
+                kwargs["load_in_8bit"] = True  # older transformers fallback
+                kwargs["torch_dtype"] = dtype
+        else:
+            kwargs["torch_dtype"] = dtype
+        try:
+            _llm = AutoModelForCausalLM.from_pretrained(LLM_MODEL, **kwargs)
+        except Exception:
+            if _llm_8bit and cuda:
+                # bitsandbytes missing / quantization failed -> fall back to fp16
+                kwargs.pop("quantization_config", None)
+                kwargs.pop("load_in_8bit", None)
+                kwargs["torch_dtype"] = dtype
+                _llm = AutoModelForCausalLM.from_pretrained(LLM_MODEL, **kwargs)
+            else:
+                raise
         if _tok.pad_token is None:
             _tok.pad_token = _tok.eos_token
     except Exception as e:  # noqa
